@@ -1,5 +1,3 @@
-
-
 //ThaddeusSM
 //03/16/18
 
@@ -7,8 +5,8 @@
 #include <Arduboy2.h>
 #include <FixedPoints.h>
 #include <FixedPointsCommon.h>
-#define MAX_GUN_ANGLE 3
-#define MIN_GUN_ANGLE -3
+#define MAX_GUN_ANGLE 1.17
+#define MIN_GUN_ANGLE -1.17
 Arduboy2 arduboy;
 
 
@@ -35,7 +33,8 @@ const unsigned char PROGMEM Gameplay1[] =
 int gamestate = 0;
 int x1 = 20;
 int y1 = 27;
-int gunAngle = 0;
+float gunAngle = 0.0;
+const float GAinc = 0.390625;
 int justpressedA = 0;
 int justpressedB = 0;
 int justpressedUP = 0;
@@ -76,13 +75,13 @@ void loop() {
     if(arduboy.pressed(UP_BUTTON)&& justpressedUP == 0) {
       justpressedUP = 1;
       if(gunAngle > MIN_GUN_ANGLE){
-        gunAngle--;
+        gunAngle = gunAngle - GAinc;
       }
     }
     if(arduboy.pressed(DOWN_BUTTON)&& justpressedDOWN == 0){
       justpressedDOWN = 1;
       if(gunAngle < MAX_GUN_ANGLE){
-         gunAngle++;
+         gunAngle = gunAngle + GAinc;
       } 
     }
 
@@ -105,3 +104,4 @@ void loop() {
 
   arduboy.display();
 }
+
