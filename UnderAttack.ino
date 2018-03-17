@@ -41,15 +41,18 @@ const int x1 = 20;
 const int y1 = 27;
 float gunAngle = 0.0;
 const float GAinc = 0.1953125;
-int justpressedA = 0;
-int justpressedB = 0;
-int justpressedUP = 0;
-int justpressedDOWN = 0;
 int x2;
 int y2;
 int x3;
 int y3;
-
+struct Bullet {
+  uint8_t x;
+  uint8_t y;
+  uint8_t xDelta;
+  int8_t yDelta;
+  bool active;
+};
+Bullet bullet = { 32, 32, 1, -1, true};
 
 
 //Setup Script
@@ -65,12 +68,12 @@ void loop() {
   if(!arduboy.nextFrame()) {
     return;
   }
+  arduboy.pollButtons();
   arduboy.clear();
   switch(gamestate){
     case 0:
     arduboy.drawBitmap(0, 0, titleScreen, 128, 64, WHITE);
-    if(arduboy.pressed(A_BUTTON) && justpressedA == 0) {
-      justpressedA = 1;
+    if(arduboy.justPressed(A_BUTTON)) {
       gamestate = 1;
     }
       break;
@@ -81,23 +84,20 @@ void loop() {
     x3 = x1 + cos(gunAngle) * 100;
     y3 = y1 + sin(gunAngle) * 100;
     arduboy.drawLine(x1, y1, x2, y2, WHITE);
-    if(arduboy.pressed(A_BUTTON) && justpressedA == 0) {
-      justpressedA = 1; 
+    if(arduboy.justPressed(A_BUTTON)) {
       gamestate = 0;
     }
-    if(arduboy.pressed(UP_BUTTON) && justpressedUP == 0) {
-      justpressedUP = 1;
+    if(arduboy.justPressed(UP_BUTTON)) {
       if(gunAngle > MIN_GUN_ANGLE){
         gunAngle = gunAngle - GAinc;
       }
     }
-    if(arduboy.pressed(DOWN_BUTTON) && justpressedDOWN == 0){
-      justpressedDOWN = 1;
+    if(arduboy.justPressed(DOWN_BUTTON)){
       if(gunAngle < MAX_GUN_ANGLE){
          gunAngle = gunAngle + GAinc;
       } 
     }
-    if(arduboy.pressed(B_BUTTON) && justpressedB == 0) {
+    if(arduboy.justPressed(B_BUTTON)) {
       if (gunAngle == 0.390625) {
         x3 = x3 - 46;
         y3 = y3 - 20;
@@ -109,6 +109,10 @@ void loop() {
         arduboy.drawLine(x2, y2, x3, y3, WHITE);
         arduboy.drawBitmap(x3 - 8, y3 - 8, Explosion, 16, 16, WHITE);
      }
+     if(arduboy.justPressed(RIGHT_BUTTON)) {
+      bullet.x += bullet.xDelta;
+      bullet.y += bullet.yDelta;
+     }
     
         arduboy.setCursor(0, 0);
         arduboy.print(gunAngle);
@@ -116,18 +120,7 @@ void loop() {
       break;
     }
 
-   if(arduboy.notPressed(A_BUTTON)) {
-    justpressedA = 0;
-   }
-   if(arduboy.notPressed(B_BUTTON)) {
-    justpressedB = 0;
-   }
-   if(arduboy.notPressed(UP_BUTTON)) {
-    justpressedUP = 0; 
-   }
-   if(arduboy.notPressed(DOWN_BUTTON)) {
-    justpressedDOWN = 0;
-   }
+
    
    arduboy.display();
 }
