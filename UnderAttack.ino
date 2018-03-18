@@ -45,14 +45,18 @@ int x2;
 int y2;
 int x3;
 int y3;
-struct Bullet {
+struct Bullet
+{
+  uint8_t bullet[100];
   uint8_t x;
   uint8_t y;
   uint8_t xDelta;
   int8_t yDelta;
   bool active;
 };
-Bullet bullet = { 32, 32, 1, -1, true};
+Bullet bullet = {28, 27, 1, -1, false};
+
+
 
 
 //Setup Script
@@ -110,12 +114,14 @@ void loop() {
         arduboy.drawBitmap(x3 - 8, y3 - 8, Explosion, 16, 16, WHITE);
      }
      if(arduboy.justPressed(RIGHT_BUTTON)) {
-      bullet.x += bullet.xDelta;
-      bullet.y += bullet.yDelta;
+        if(bullet.active == false) {
+          Bullet bullet = { 28, 27, 1, -1, true };
+        }
      }
-    
-        arduboy.setCursor(0, 0);
-        arduboy.print(gunAngle);
+    bullet.x += bullet.xDelta; 
+    bullet.y += bullet.yDelta;
+    arduboy.setCursor(0, 0);
+    arduboy.print(gunAngle);
 
       break;
     }
