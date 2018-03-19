@@ -62,7 +62,7 @@ struct Bullet {
 struct Soldier {
   uint8_t x;
   uint8_t y;
-  int16_t xDelta;
+  int8_t xDelta;
   int8_t yDelta;
   bool active;
 };
@@ -137,7 +137,7 @@ void loop() {
         for (int16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
 
           if (!soldiers[x].active) {
-            soldiers[x].x = random(127, 500);
+            soldiers[x].x = random(100, 128);
             soldiers[x].y = 36;
             soldiers[x].xDelta = -1;
             soldiers[x].yDelta = 0;
@@ -210,15 +210,23 @@ void loop() {
 
           bullets[x].active = false;
           
+        } else { 
+          for (int16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
+            Point bulletPoint = Point {bullets[x].x, bullets[x].y};
+            if(soldiers[x].active) {
+              Rect enemyRect = Rect {soldiers[x].x, soldiers[x].y, 16, 16};
+                 if(arduboy.collide(bulletPoint, enemyRect)) {
+                  soldiers[x].active = false;
+                }
+             }
+          } 
         }
         
 
       }
-      Point bulletPoint = Point {bullets[x].x, bullets[x].y};
-      Rect enemyRect = Rect {soldiers[x].x, soldiers[x].y, 16, 16};
-      if(arduboy.collide(bulletPoint, enemyRect)) {
-        soldiers[x].active = false;
-      }
+      
+      
+
       
     }
 
