@@ -9,6 +9,8 @@
 #define MIN_GUN_ANGLE -1.10
 #define NUMBER_OF_BULLETS 15
 #define NUMBER_OF_SOLDIERS 2
+#define NUMBER_OF_HELICOPTERS 1
+#define NUMBER_OF_TACOBOSSES 2
 
 Arduboy2 arduboy;
 
@@ -41,12 +43,25 @@ const unsigned char PROGMEM Soldier2[] = {
 0x80, 0x80, 0x80, 0x00, 0x70, 0xc8, 0xe8, 0xc8, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 0x00, 0x01, 0x02, 0x01, 0x01, 0x3f, 0x03, 0x3b, 0x0f, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 };
-
+const unsigned char PROGMEM Helicopter1[] = {
+// width, height,
+20, 20,
+0x08, 0x08, 0x88, 0x48, 0x24, 0x24, 0xe4, 0xfc, 0x24, 0x24, 0xe2, 0xe2, 0xe2, 0x62, 0x30, 0x18, 0x0e, 0x30, 0x00, 0x00, 
+0x00, 0x00, 0x01, 0x0b, 0x0b, 0x0f, 0x0b, 0x09, 0x05, 0x05, 0x07, 0x05, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+};
+const unsigned char PROGMEM TACOBOSS[] = {
+// width, height,
+20, 20,
+0x00, 0x00, 0x00, 0x00, 0x80, 0x40, 0x40, 0x20, 0x20, 0xa0, 0xe0, 0x60, 0xc0, 0xc0, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x1c, 0x23, 0x40, 0x78, 0x7e, 0x7f, 0x6f, 0x7f, 0x7b, 0x7f, 0x5f, 0x7f, 0x5d, 0x77, 0x7f, 0x7e, 0x38, 0x00, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+};
 int gamestate = 0;
 const int x1 = 20;
 const int y1 = 27;
 float gunAngle = 0.0;
-const float GAinc = 0.03;
+const float GAinc = 0.038;
 int x2;
 int y2;
 int x3;
@@ -67,13 +82,27 @@ struct Soldier {
   bool active;
 };
 int health = 50;
-
-
+struct Helicopter {
+  uint16_t x;
+  uint8_t y;
+  float xDelta;
+  int8_t yDelta;
+  bool active;
+};
+struct Tacoboss {
+  uint16_t x;
+  uint8_t y;
+  float xDelta;
+  int8_t yDelta;
+  bool active;
+};
 
 
 Bullet bullets[NUMBER_OF_BULLETS];
 //Bullet bullet = {28, 27, 1, -1, false};
 Soldier soldiers[NUMBER_OF_SOLDIERS];
+Helicopter helicopters[NUMBER_OF_HELICOPTERS];
+Tacoboss tacobosses[NUMBER_OF_TACOBOSSES];
 
 
 
@@ -135,13 +164,13 @@ void loop() {
           
         }
      }
-      if(score > -1) {
+      if(score > -1 && score < 1000) {
         for (uint16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
 
           if (!soldiers[x].active) {
             soldiers[x].x = random(130, 160);
             soldiers[x].y = 36;
-            soldiers[x].xDelta = -0.01;
+            soldiers[x].xDelta = -1;
             soldiers[x].yDelta = 0;
             soldiers[x].active = true;
             break; 
@@ -150,6 +179,35 @@ void loop() {
           
         }
      }
+     if(score > 199 && score < 1000) {
+        for (uint16_t x = 0; x < NUMBER_OF_HELICOPTERS; x++) {
+
+          if (!helicopters[x].active) {
+            helicopters[x].x = random(180, 250);
+            helicopters[x].y = random(12, 24);
+            helicopters[x].xDelta = random(-2, -1);
+            helicopters[x].yDelta = 0;
+            helicopters[x].active = true;
+            break; 
+            
+          }
+        }
+     }
+     if(score > 999) {
+        for (uint16_t x = 0; x < NUMBER_OF_TACOBOSSES; x++) {
+
+          if (!helicopters[x].active) {
+            helicopters[x].x = random(180, 250);
+            helicopters[x].y = random(10, 30);
+            helicopters[x].xDelta = -2;
+            helicopters[x].yDelta = 0;
+            helicopters[x].active = true;
+            break; 
+            
+          }
+        }
+     }
+
 
 
 
@@ -175,6 +233,24 @@ void loop() {
       }
       
     }
+     for (uint16_t x = 0; x < NUMBER_OF_HELICOPTERS; x++) {
+    
+      if (helicopters[x].active) {
+      
+        arduboy.drawBitmap(helicopters[x].x, helicopters[x].y, Helicopter1, 20, 20, WHITE);
+
+      }
+      
+    }
+    for (uint16_t x = 0; x < NUMBER_OF_TACOBOSSES; x++) {
+    
+      if (tacobosses[x].active) {
+      
+        arduboy.drawBitmap(tacobosses[x].x, tacobosses[x].y, TACOBOSS, 20, 20, WHITE);
+
+      }
+      
+    }
     for (uint16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
     
       if (soldiers[x].active) {
@@ -186,7 +262,43 @@ void loop() {
 
         if (soldiers[x].x < 18 || soldiers[x].y < 0 || soldiers[x].y > HEIGHT ) {
           soldiers[x].active = false;
-          health -= 1;
+          health -= 2;
+          
+        }
+
+      }
+      
+    }
+    for (uint16_t x = 0; x < NUMBER_OF_HELICOPTERS; x++) {
+    
+      if (helicopters[x].active) {
+      
+        helicopters[x].x += helicopters[x].xDelta; 
+        helicopters[x].y += helicopters[x].yDelta;
+
+        // Out of range ?
+
+        if (helicopters[x].x < 18 || helicopters[x].y < 0 || helicopters[x].y > HEIGHT ) {
+          helicopters[x].active = false;
+          health -= 10;
+          
+        }
+
+      }
+      
+    }
+    for (uint16_t x = 0; x < NUMBER_OF_TACOBOSSES; x++) {
+    
+      if (tacobosses[x].active) {
+      
+        tacobosses[x].x += tacobosses[x].xDelta; 
+        tacobosses[x].y += tacobosses[x].yDelta;
+
+        // Out of range ?
+
+        if (tacobosses[x].x < 18 || tacobosses[x].y < 0 || tacobosses[x].y > HEIGHT ) {
+          tacobosses[x].active = false;
+          health -= 10;
           
         }
 
@@ -219,7 +331,27 @@ void loop() {
               Rect enemyRect = Rect {soldiers[x].x, soldiers[x].y, 16, 16};
                  if(arduboy.collide(bulletPoint, enemyRect)) {
                   soldiers[x].active = false;
-                  score += 5;
+                  score += 2;
+                }
+             }
+          } 
+        for (uint16_t x = 0; x < NUMBER_OF_HELICOPTERS; x++) {
+            Point bulletPoint = Point {bullets[x].x, bullets[x].y};
+            if(helicopters[x].active) {
+              Rect helicopterRect = Rect {helicopters[x].x, helicopters[x].y, 20, 20};
+                 if(arduboy.collide(bulletPoint, helicopterRect)) {
+                  helicopters[x].active = false;
+                  score += 10;
+                }
+             }
+          } 
+           for (uint16_t x = 0; x < NUMBER_OF_TACOBOSSES; x++) {
+            Point bulletPoint = Point {bullets[x].x, bullets[x].y};
+            if(tacobosses[x].active) {
+              Rect tacobossRect = Rect {tacobosses[x].x, tacobosses[x].y, 20, 20};
+                 if(arduboy.collide(bulletPoint, tacobossRect)) {
+                  tacobosses[x].active = false;
+                  score += 10;
                 }
              }
           } 
@@ -232,7 +364,7 @@ void loop() {
 
       
     }
-    if(arduboy.justPressed(A_BUTTON) && score > 49 && health < 51) {
+    if(arduboy.justPressed(A_BUTTON) && score > 49 && health < 51 && score < 1001) {
       health += 10;
       score -= 50;
     }
@@ -246,6 +378,9 @@ void loop() {
     if (health < 1) {
       gamestate = 2;
     }
+    if(score > 1499) {
+      gamestate = 3;
+    }
 
       break;
      case 2:
@@ -257,6 +392,14 @@ void loop() {
      gamestate = 0;
     }
       break;
+     case 3:
+     arduboy.setCursor(40, 28);
+     arduboy.print("YOU WIN!!!");
+     arduboy.setCursor(40, 40);
+     arduboy.print("PRESS 'A' ");
+     if(arduboy.justPressed(A_BUTTON)){
+      gamestate = 0;
+      }
   }
 
    
