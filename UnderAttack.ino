@@ -5,10 +5,10 @@
 #include <Arduboy2.h>
 #include <FixedPoints.h>
 #include <FixedPointsCommon.h>
-#define MAX_GUN_ANGLE 1.05
-#define MIN_GUN_ANGLE -1.05
-#define NUMBER_OF_BULLETS 10
-#define NUMBER_OF_SOLDIERS 3
+#define MAX_GUN_ANGLE 1.10
+#define MIN_GUN_ANGLE -1.10
+#define NUMBER_OF_BULLETS 15
+#define NUMBER_OF_SOLDIERS 2
 
 Arduboy2 arduboy;
 
@@ -46,7 +46,7 @@ int gamestate = 0;
 const int x1 = 20;
 const int y1 = 27;
 float gunAngle = 0.0;
-const float GAinc = 0.15;
+const float GAinc = 0.03;
 int x2;
 int y2;
 int x3;
@@ -60,12 +60,14 @@ struct Bullet {
   bool active;
 };
 struct Soldier {
-  uint8_t x;
+  uint16_t x;
   uint8_t y;
-  int8_t xDelta;
+  float xDelta;
   int8_t yDelta;
   bool active;
 };
+int health = 50;
+
 
 
 
@@ -97,22 +99,22 @@ void loop() {
     arduboy.drawBitmap(0, 0, titleScreen, 128, 64, WHITE);
     if(arduboy.justPressed(A_BUTTON)) {
       gamestate = 1;
+      score = 0;
+      health = 50;
     }
+
       break;
     case 1:
     arduboy.drawBitmap(0, 0, Gameplay1, 128, 64, WHITE);
     x2 = x1 + cos(gunAngle) * 8;
     y2 = y1 + sin(gunAngle) * 8;
     arduboy.drawLine(x1, y1, x2, y2, WHITE);
-    if(arduboy.justPressed(A_BUTTON)) {
-      gamestate = 0;
-    }
-    if(arduboy.justPressed(UP_BUTTON) or arduboy.justPressed(LEFT_BUTTON)) {
+    if(arduboy.pressed(UP_BUTTON) or arduboy.justPressed(LEFT_BUTTON)) {
       if(gunAngle > MIN_GUN_ANGLE){
         gunAngle = gunAngle - GAinc;
       }
     }
-    if(arduboy.justPressed(DOWN_BUTTON) or arduboy.justPressed(RIGHT_BUTTON)){
+    if(arduboy.pressed(DOWN_BUTTON) or arduboy.justPressed(RIGHT_BUTTON)){
       if(gunAngle < MAX_GUN_ANGLE){
          gunAngle = gunAngle + GAinc;
       } 
@@ -124,8 +126,8 @@ void loop() {
           if (!bullets[x].active) {
             bullets[x].x = x2;
             bullets[x].y = y2;
-            bullets[x].xDelta = cos(gunAngle)*5;
-            bullets[x].yDelta = sin(gunAngle)*7;
+            bullets[x].xDelta = cos(gunAngle)* 5;
+            bullets[x].yDelta = sin(gunAngle)* 7 ;
             bullets[x].active = true;
             break;  // We found one so we can leave the loop.
             
@@ -134,12 +136,12 @@ void loop() {
         }
      }
       if(score > -1) {
-        for (int16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
+        for (uint16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
 
           if (!soldiers[x].active) {
-            soldiers[x].x = random(100, 128);
+            soldiers[x].x = random(130, 160);
             soldiers[x].y = 36;
-            soldiers[x].xDelta = -1;
+            soldiers[x].xDelta = -0.01;
             soldiers[x].yDelta = 0;
             soldiers[x].active = true;
             break; 
@@ -164,7 +166,7 @@ void loop() {
       }
       
     }
-    for (int16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
+    for (uint16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
     
       if (soldiers[x].active) {
       
@@ -173,8 +175,7 @@ void loop() {
       }
       
     }
-
-    for (int16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
+    for (uint16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
     
       if (soldiers[x].active) {
       
@@ -183,8 +184,9 @@ void loop() {
 
         // Out of range ?
 
-        if (soldiers[x].x < 28 || soldiers[x].y < 0 || soldiers[x].y > HEIGHT ) {
+        if (soldiers[x].x < 18 || soldiers[x].y < 0 || soldiers[x].y > HEIGHT ) {
           soldiers[x].active = false;
+          health -= 1;
           
         }
 
@@ -211,12 +213,13 @@ void loop() {
           bullets[x].active = false;
           
         } else { 
-          for (int16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
+          for (uint16_t x = 0; x < NUMBER_OF_SOLDIERS; x++) {
             Point bulletPoint = Point {bullets[x].x, bullets[x].y};
             if(soldiers[x].active) {
               Rect enemyRect = Rect {soldiers[x].x, soldiers[x].y, 16, 16};
                  if(arduboy.collide(bulletPoint, enemyRect)) {
                   soldiers[x].active = false;
+                  score += 5;
                 }
              }
           } 
@@ -229,14 +232,32 @@ void loop() {
 
       
     }
+    if(arduboy.justPressed(A_BUTTON) && score > 49 && health < 51) {
+      health += 10;
+      score -= 50;
+    }
 
 
     arduboy.setCursor(0, 0);
     arduboy.print(score);
-
-      break;
+    arduboy.setCursor(50, 0);
+    arduboy.print("HP:");
+    arduboy.drawLine(64, 3, 64 + health, 3, WHITE); 
+    if (health < 1) {
+      gamestate = 2;
     }
 
+      break;
+     case 2:
+     arduboy.setCursor(40, 28);
+     arduboy.print("GAME OVER");
+     arduboy.setCursor(40, 40);
+     arduboy.print("PRESS 'A' ");
+     if(arduboy.justPressed(A_BUTTON)){
+     gamestate = 0;
+    }
+      break;
+  }
 
    
    arduboy.display();
