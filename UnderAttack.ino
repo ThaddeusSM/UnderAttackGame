@@ -8,7 +8,7 @@
 #define MAX_GUN_ANGLE 1.05
 #define MIN_GUN_ANGLE -1.05
 #define NUMBER_OF_BULLETS 10
-#define NUMBER_OF_SOLDIERS 10
+#define NUMBER_OF_SOLDIERS 3
 
 Arduboy2 arduboy;
 
