@@ -10,7 +10,7 @@
 #define NUMBER_OF_BULLETS 15
 #define NUMBER_OF_SOLDIERS 2
 #define NUMBER_OF_HELICOPTERS 1
-#define NUMBER_OF_TACOBOSSES 2
+#define NUMBER_OF_TACOBOSSES 3
 
 Arduboy2 arduboy;
 
@@ -196,12 +196,12 @@ void loop() {
      if(score > 999) {
         for (uint16_t x = 0; x < NUMBER_OF_TACOBOSSES; x++) {
 
-          if (!helicopters[x].active) {
-            helicopters[x].x = random(180, 250);
-            helicopters[x].y = random(10, 30);
-            helicopters[x].xDelta = -2;
-            helicopters[x].yDelta = 0;
-            helicopters[x].active = true;
+          if (!tacobosses[x].active) {
+            tacobosses[x].x = random(180, 250);
+            tacobosses[x].y = random(9, 32);
+            tacobosses[x].xDelta = -2;
+            tacobosses[x].yDelta = 0;
+            tacobosses[x].active = true;
             break; 
             
           }
@@ -298,7 +298,7 @@ void loop() {
 
         if (tacobosses[x].x < 18 || tacobosses[x].y < 0 || tacobosses[x].y > HEIGHT ) {
           tacobosses[x].active = false;
-          health -= 10;
+          health -= 30;
           
         }
 
@@ -364,7 +364,7 @@ void loop() {
 
       
     }
-    if(arduboy.justPressed(A_BUTTON) && score > 49 && health < 51 && score < 1001) {
+    if(arduboy.justPressed(A_BUTTON) && score > 49 && health < 50 && score < 1001) {
       health += 10;
       score -= 50;
     }
