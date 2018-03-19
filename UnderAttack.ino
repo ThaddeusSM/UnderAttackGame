@@ -130,6 +130,9 @@ void loop() {
       gamestate = 1;
       score = 0;
       health = 50;
+      soldiers[x].active = false;
+      helicopters[x].active = false;
+      tacobosses[x].active = false;
     }
 
       break;
